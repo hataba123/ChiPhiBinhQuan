@@ -11,6 +11,9 @@ npm install
 npm run dev
 ```
 
+Hoặc trên Windows, double-click file `Chay-web.bat` để tự cài đặt (nếu cần),
+khởi động web và mở trình duyệt.
+
 ## Tính năng
 
 - Thêm món đồ với tên, nhóm, giá tiền và thời gian sử dụng.

@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 type DurationUnit = "months" | "years";
 
@@ -19,6 +19,8 @@ const initialItems: Item[] = [
   { id: 4, name: "Điện thoại", price: 14500000, months: 48, category: "Công nghệ" },
 ];
 
+const itemsStorageKey = "chi-phi-binh-quan-items";
+
 const currency = new Intl.NumberFormat("vi-VN", {
   style: "currency",
   currency: "VND",
@@ -34,9 +36,36 @@ function formatDuration(months: number) {
 
 export default function Home() {
   const [items, setItems] = useState<Item[]>(initialItems);
+  const hasLoadedItems = useRef(false);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState(emptyForm);
+
+  useEffect(() => {
+    try {
+      const storedItems = window.localStorage.getItem(itemsStorageKey);
+      if (storedItems) {
+        const parsedItems = JSON.parse(storedItems) as Item[];
+        if (Array.isArray(parsedItems)) {
+          setItems(parsedItems);
+        }
+      }
+    } catch {
+      // Tiếp tục dùng dữ liệu mặc định nếu localStorage không khả dụng hoặc không hợp lệ.
+    } finally {
+      hasLoadedItems.current = true;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!hasLoadedItems.current) return;
+
+    try {
+      window.localStorage.setItem(itemsStorageKey, JSON.stringify(items));
+    } catch {
+      // Không làm gián đoạn thao tác trên giao diện nếu không thể ghi storage.
+    }
+  }, [items]);
 
   const summary = useMemo(() => {
     const totalValue = items.reduce((sum, item) => sum + item.price, 0);
